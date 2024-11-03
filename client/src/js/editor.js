@@ -1,7 +1,7 @@
 import { getDb, putDb } from './database';
-import { header } from './header';
+import { header } from './header'; // Import the header
 
-export default class Editor {
+export default class {
   constructor() {
     const localData = localStorage.getItem('content');
 
@@ -21,31 +21,34 @@ export default class Editor {
       tabSize: 2,
     });
 
-    // When the editor is ready, set the value to whatever is stored in indexedDB.
+    // Load content from IndexedDB or set the initial header
     getDb().then((data) => {
-      console.info('Loaded data from IndexedDB, injecting into editor:', data);
-
-      // Check if data is an array and extract the relevant string
-      const valueToSet = Array.isArray(data) && data.length > 0
-        ? JSON.stringify(data, null, 2) // Convert the array to a string for the editor
-        : (typeof localData === 'string' ? localData : header);
-
-      this.editor.setValue(valueToSet);
-    }).catch(err => {
-      console.error('Failed to load data from IndexedDB:', err);
-      // Set to header in case of an error
-      this.editor.setValue(localData || header);
+      console.info('Loaded data from IndexedDB:', data);
+      
+      // Check if the retrieved data is an array
+      if (Array.isArray(data) && data.length > 0) {
+        console.info('Data is an array with length:', data.length);
+        
+        // Extract content and ensure it's a string
+        const contentToSet = data.map(item => item.content || '').join('\n');
+        console.info('Combined content to set in editor:', contentToSet);
+        
+        // Set the editor value
+        this.editor.setValue(contentToSet || localData || header);
+      } else {
+        console.error('Data retrieved is not an array or is empty:', data);
+        this.editor.setValue(localData || header);
+      }
     });
 
     this.editor.on('change', () => {
       localStorage.setItem('content', this.editor.getValue());
     });
 
-    // Save the content of the editor when the editor itself loses focus
+    // Save the content of the editor when it loses focus
     this.editor.on('blur', () => {
       console.log('The editor has lost focus');
-      putDb(localStorage.getItem('content'));
+      putDb(this.editor.getValue());
     });
   }
 }
-
