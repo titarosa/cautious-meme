@@ -1,14 +1,15 @@
+const path = require('path'); // Import the path module
 const HtmlWebpackPlugin = require('html-webpack-plugin');
-const PwaManifest = require('webpack-pwa-manifest');
-const path = require('path');
 const { InjectManifest } = require('workbox-webpack-plugin');
+const WebpackPwaManifest = require('webpack-pwa-manifest');
+
 
 module.exports = () => {
   return {
     mode: 'development',
     entry: {
       main: './src/js/index.js',
-      install: './src/js/install.js',
+      install: './src/js/install.js'
     },
     output: {
       filename: '[name].bundle.js',
@@ -16,19 +17,19 @@ module.exports = () => {
     },
     plugins: [
       new HtmlWebpackPlugin({
-        template: './src/index.html', // Specify the template path
-        title: 'Just Another Text Editor', // Set title for the HTML
-      }),
+        template: './index.html', 
+        title: 'J.A.T.E',
+      }),      
       new InjectManifest({
-        swSrc: './src/src-sw.js', // Path to your custom service worker
+        swSrc: './src-sw.js', 
         swDest: 'src-sw.js',
-      }),
-      new PwaManifest({
-        fingerprints: false, // Disable fingerprinting
+      }),      
+      new WebpackPwaManifest({
+        fingerprints: false,
         inject: true,
         name: 'Just Another Text Editor',
         short_name: 'J.A.T.E',
-        description: 'An application for taking notes with JavaScript syntax highlighting!',
+        description: 'Takes notes with JavaScript syntax highlighting!',
         background_color: '#225ca3',
         theme_color: '#225ca3',
         start_url: '/',
@@ -36,8 +37,8 @@ module.exports = () => {
         icons: [
           {
             src: path.resolve('src/images/logo.png'),
-            sizes: [96, 128, 192, 256, 384, 512], // Icon sizes
-            destination: path.join('assets', 'icons'), // Destination for icons
+            sizes: [96, 128, 192, 256, 384, 512],
+            destination: path.join('assets', 'icons'),
           },
         ],
       }),
@@ -46,20 +47,17 @@ module.exports = () => {
     module: {
       rules: [
         {
-          test: /\.css$/i, // Match CSS files
-          use: ['style-loader', 'css-loader'], // Loaders for styles
+          test: /\.css$/i,
+          use: ['style-loader', 'css-loader'],
         },
         {
-          test: /\.m?js$/, // Match JavaScript files
-          exclude: /node_modules/, // Exclude node_modules
+          test: /\.m?js$/,
+          exclude: /node_modules/,
           use: {
-            loader: 'babel-loader', // Use Babel for transpilation
+            loader: 'babel-loader',
             options: {
-              presets: ['@babel/preset-env'], // Presets for ES6+
-              plugins: [
-                '@babel/plugin-proposal-object-rest-spread', // Enable object rest/spread
-                '@babel/transform-runtime', // Optimize code
-              ],
+              presets: ['@babel/preset-env'],
+              plugins: ['@babel/plugin-proposal-object-rest-spread', '@babel/transform-runtime'],
             },
           },
         },
@@ -67,3 +65,4 @@ module.exports = () => {
     },
   };
 };
+
